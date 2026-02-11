@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рулетка демонов с KotGDPS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- Стили без изменений (полностью из предыдущего ответа) --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 25px 20px;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            border: 2px solid #ff4757;
+            box-shadow: 0 10px 25px rgba(255, 71, 87, 0.3);
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #ff4757, #ff9f43);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
+        }
+        
+        .back-button {
+            background: linear-gradient(to right, #6c757d, #adb5bd);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+            display: inline-block;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(108, 117, 125, 0.6);
+            text-decoration: none;
+            color: white;
+        }
+        
+        .setup-panel {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .setup-panel h2 {
+            color: #ff9f43;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff9f43;
+            font-size: 1.8rem;
+        }
+        
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .option-group {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .option-group h3 {
+            color: #ff9f43;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .option {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            border: 1px solid #444;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #ff9f43;
+        }
+        
+        .option.selected {
+            background: rgba(255, 71, 87, 0.2);
+            border-color: #ff4757;
+        }
+        
+        .option input {
+            margin-right: 15px;
+            transform: scale(1.3);
+        }
+        
+        .start-button {
+            background: linear-gradient(to right, #ff4757, #ff9f43);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(255, 71, 87, 0.4);
+            display: block;
+            margin: 0 auto;
+            letter-spacing: 1px;
+        }
+        
+        .start-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(255, 71, 87, 0.6);
+        }
+        
+        .game-panel {
+            display: none;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .game-panel h2 {
+            color: #ff9f43;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff9f43;
+            font-size: 1.8rem;
+        }
+        
+        .game-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .current-level-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .level-info {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .level-info.final-test {
+            background: rgba(106, 13, 173, 0.3);
+            border-color: #8A2BE2;
+            box-shadow: 0 10px 20px rgba(138, 43, 226, 0.4);
+        }
+        
+        .final-test-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(to right, #8A2BE2, #9370DB);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(138, 43, 226, 0.5);
+        }
+        
+        .level-info.final-test .final-test-badge {
+            display: block;
+        }
+        
+        .preview-container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .preview-image {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7);
+            border: 1px solid #555;
+            transition: opacity 0.01s;
+        }
+        
+        .level-name {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: #ff9f43;
+            text-shadow: 0 0 15px rgba(255, 159, 67, 0.7);
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        
+        .level-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .level-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .level-meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .level-meta-label {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        .level-meta-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .level-tags {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .difficulty-tag {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .skillset-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .skillset-tag {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff9f43;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: 1px solid #ff4757;
+        }
+        
+        .extreme-demon {
+            background: linear-gradient(to right, #8B0000, #FF0000);
+            color: white;
+        }
+        
+        .insane-demon {
+            background: linear-gradient(to right, #8A2BE2, #9370DB);
+            color: white;
+        }
+        
+        .hard-demon {
+            background: linear-gradient(to right, #FF8C00, #FFA500);
+            color: white;
+        }
+        
+        .medium-demon {
+            background: linear-gradient(to right, #32CD32, #9ACD32);
+            color: white;
+        }
+        
+        .easy-demon {
+            background: linear-gradient(to right, #1E90FF, #87CEEB);
+            color: white;
+        }
+        
+        .requirement {
+            background: rgba(255, 71, 87, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            border: 1px solid #ff4757;
+        }
+        
+        .requirement h4 {
+            color: #ff9f43;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .requirement .percentage {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff4757;
+            text-shadow: 0 0 10px rgba(255, 71, 87, 0.7);
+        }
+        
+        .controls {
+            flex: 0 0 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+        }
+        
+        .controls h3 {
+            color: #ff9f43;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+        
+        .next-button, .give-up-button, .finish-button, .skip-button {
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin-bottom: 20px;
+            width: 100%;
+            letter-spacing: 1px;
+        }
+        
+        .next-button {
+            background: linear-gradient(to right, #32CD32, #9ACD32);
+            box-shadow: 0 10px 20px rgba(50, 205, 50, 0.4);
+        }
+        
+        .skip-button {
+            background: linear-gradient(to right, #1E90FF, #87CEEB);
+            box-shadow: 0 10px 20px rgba(30, 144, 255, 0.4);
+        }
+        
+        .give-up-button {
+            background: linear-gradient(to right, #ff4757, #FF6347);
+            box-shadow: 0 10px 20px rgba(255, 71, 87, 0.4);
+        }
+        
+        .finish-button {
+            background: linear-gradient(to right, #8A2BE2, #9370DB);
+            box-shadow: 0 10px 20px rgba(138, 43, 226, 0.4);
+        }
+        
+        .next-button:hover, .give-up-button:hover, .finish-button:hover, .skip-button:hover {
+            transform: translateY(-5px);
+        }
+        
+        .next-button:active, .give-up-button:active, .finish-button:active, .skip-button:active {
+            transform: translateY(0);
+        }
+        
+        .fluct-input {
+            width: 100%;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .fluct-input label {
+            display: block;
+            color: #ff9f43;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .fluct-input input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.5rem;
+            text-align: center;
+            border-radius: 10px;
+            border: 2px solid #444;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+        }
+        
+        .fluct-input input:focus {
+            outline: none;
+            border-color: #ff9f43;
+        }
+        
+        .stats {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #444;
+            margin-top: 20px;
+        }
+        
+        .stats h4 {
+            color: #ff9f43;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .stats p {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .level-history {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .level-history h3 {
+            color: #ff9f43;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff9f43;
+            font-size: 1.8rem;
+        }
+        
+        .history-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .history-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #444;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .history-level-name {
+            font-weight: bold;
+            color: #ff9f43;
+            flex: 1;
+        }
+        
+        .history-percentage {
+            font-weight: bold;
+            color: #ff4757;
+            font-size: 1.2rem;
+        }
+        
+        .completion-panel {
+            display: none;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid #32CD32;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        
+        .completion-panel.surrendered {
+            border-color: #ff4757;
+        }
+        
+        .completion-panel h2 {
+            color: #32CD32;
+            margin-bottom: 25px;
+            font-size: 2.5rem;
+        }
+        
+        .completion-panel.surrendered h2 {
+            color: #ff4757;
+        }
+        
+        .completion-panel h3 {
+            color: #ff9f43;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .completion-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #444;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff9f43;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value.sad {
+            color: #ff4757;
+            font-size: 2.5rem;
+        }
+        
+        .final-history {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .final-history h4 {
+            color: #ff9f43;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .final-history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .final-history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .final-history-name {
+            color: #fff;
+            flex: 1;
+        }
+        
+        .final-history-percentage {
+            color: #ff9f43;
+            font-weight: bold;
+            margin-left: 15px;
+        }
+        
+        .final-history-difficulty {
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        
+        .restart-button {
+            background: linear-gradient(to right, #ff4757, #ff9f43);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(255, 71, 87, 0.4);
+            margin-top: 20px;
+            letter-spacing: 1px;
+        }
+        
+        .restart-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(255, 71, 87, 0.6);
+        }
+        
+        .stamina-points {
+            font-size: 1.2rem;
+            color: #ff9f43;
+            font-weight: bold;
+        }
+        
+        .stamina-breakdown {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        
+        .rules-section {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .rules-section h2 {
+            color: #ff9f43;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff9f43;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .rule-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #444;
+        }
+        
+        .rule-card h3 {
+            color: #ff9f43;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .rule-list {
+            list-style-type: none;
+        }
+        
+        .rule-list li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .rule-list li:before {
+            content: "•";
+            color: #ff4757;
+            font-size: 1.5rem;
+            position: absolute;
+            left: 0;
+            top: -5px;
+        }
+        
+        .points-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .points-table th, .points-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+        
+        .points-table th {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff9f43;
+            font-weight: bold;
+        }
+        
+        .points-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 0.9rem;
+            border-top: 1px solid #333;
+            margin-top: 30px;
+        }
+        
+        .footer-note {
+            color: #ff9f43;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .current-level-section {
+                flex-direction: column;
+            }
+            .controls {
+                order: 1;
+            }
+            .level-info {
+                order: 2;
+            }
+            .level-history {
+                order: 3;
+                margin-top: 20px;
+            }
+            h1 {
+                font-size: 2.2rem;
+            }
+            .game-layout {
+                gap: 20px;
+            }
+            .level-name {
+                font-size: 1.8rem;
+            }
+            .level-details-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .rules-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-fire"></i> Рулетка демонов с KotGDPS</h1>
+            <a href="https://sites.google.com/view/kotgdps" target="_blank" class="back-button">
+                <i class="fas fa-arrow-left"></i> Вернуться на основной сайт
+            </a>
+        </header>
+        
+        <!-- Панель настроек -->
+        <div class="setup-panel" id="setup-panel">
+            <h2><i class="fas fa-cog"></i> Настройки рулетки</h2>
+            <div class="options">
+                <div class="option-group">
+                    <h3><i class="fas fa-users"></i> Типы уровней</h3>
+                    <div class="option" id="option-custom">
+                        <input type="radio" id="custom-only" name="level-type" value="custom" checked>
+                        <label for="custom-only">Только пользовательские уровни</label>
+                    </div>
+                    <div class="option" id="option-mixed">
+                        <input type="radio" id="mixed" name="level-type" value="mixed">
+                        <label for="mixed">Пользовательские + уровни RobTop</label>
+                    </div>
+                </div>
+                <div class="option-group">
+                    <h3><i class="fas fa-chart-line"></i> Режим прогресса</h3>
+                    <div class="option" id="option-no-fluct">
+                        <input type="radio" id="no-fluct" name="progress-mode" value="no-fluct" checked>
+                        <label for="no-fluct">Без флюков (постоянное увеличение на 1%)</label>
+                    </div>
+                    <div class="option" id="option-fluct">
+                        <input type="radio" id="fluct" name="progress-mode" value="fluct">
+                        <label for="fluct">С флюками (ввод достигнутого процента)</label>
+                    </div>
+                </div>
+            </div>
+            <button class="start-button" id="start-button">
+                <i class="fas fa-play"></i> Начать пытку
+            </button>
+        </div>
+        
+        <!-- Игровая панель -->
+        <div class="game-panel" id="game-panel">
+            <h2><i class="fas fa-gamepad"></i> Рулетка демонов</h2>
+            <div class="game-layout">
+                <div class="current-level-section">
+                    <div class="level-info" id="level-info">
+                        <div class="final-test-badge">final test</div>
+                        <div class="preview-container">
+                            <img src="" alt="Превью уровня" class="preview-image" id="preview-image">
+                        </div>
+                        <div class="level-name" id="level-name">-</div>
+                        <div class="level-details-grid">
+                            <div class="level-meta">
+                                <div class="level-meta-item">
+                                    <div class="level-meta-label">Автор</div>
+                                    <div class="level-meta-value" id="level-author">-</div>
+                                </div>
+                                <div class="level-meta-item">
+                                    <div class="level-meta-label">ID уровня</div>
+                                    <div class="level-meta-value" id="level-id">-</div>
+                                </div>
+                            </div>
+                            <div class="level-tags">
+                                <div class="difficulty-tag" id="level-difficulty-tag">-</div>
+                                <div class="skillset-tags" id="skillset-tags"></div>
+                            </div>
+                        </div>
+                        <div class="requirement">
+                            <h4><i class="fas fa-bullseye"></i> Требуемый процент</h4>
+                            <div class="percentage" id="required-percentage">1%</div>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <h3><i class="fas fa-random"></i> Управление</h3>
+                        <div class="fluct-input" id="fluct-input" style="display: none;">
+                            <label for="achieved-percentage"><i class="fas fa-percentage"></i> Достигнутый процент</label>
+                            <input type="number" id="achieved-percentage" min="1" max="100" placeholder="1-100">
+                        </div>
+                        <button class="next-button" id="next-button">
+                            <i class="fas fa-forward"></i> Дальше
+                        </button>
+                        <button class="skip-button" id="skip-button">
+                            <i class="fas fa-fast-forward"></i> Пропуск
+                        </button>
+                        <button class="give-up-button" id="give-up-button">
+                            <i class="fas fa-flag"></i> Сдаться
+                        </button>
+                        <div class="stats">
+                            <h4><i class="fas fa-chart-bar"></i> Статистика</h4>
+                            <p>Уровней пройдено: <span id="levels-passed">0</span></p>
+                            <p>Текущий прогресс: <span id="current-progress">1%</span></p>
+                            <p>Режим: <span id="game-mode">Без флюков</span></p>
+                            <p>Баллы стойкости: <span id="stamina-points" class="stamina-points">0</span></p>
+                            <div id="stamina-breakdown" class="stamina-breakdown"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="level-history">
+                    <h3><i class="fas fa-history"></i> История уровней</h3>
+                    <div class="history-container" id="history-container"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Панель завершения -->
+        <div class="completion-panel" id="completion-panel">
+            <h2><i class="fas fa-trophy"></i> Поздравляем!</h2>
+            <h3>Вы успешно завершили рулетку демонов!</h3>
+            <div class="completion-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="final-levels">0</div>
+                    <div>Уровней пройдено</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="final-progress">100%</div>
+                    <div>Финальный прогресс</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="final-mode">-</div>
+                    <div>Режим игры</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="final-stamina">0</div>
+                    <div>Баллы стойкости</div>
+                </div>
+            </div>
+            <div class="final-history">
+                <h4><i class="fas fa-list"></i> История рулетки</h4>
+                <div id="final-history-container"></div>
+            </div>
+            <button class="restart-button" id="restart-button">
+                <i class="fas fa-redo"></i> Начать заново
+            </button>
+        </div>
+        
+        <!-- Раздел с правилами -->
+        <div class="rules-section">
+            <h2><i class="fas fa-calculator"></i> Правила подсчета баллов стойкости</h2>
+            <div class="rules-grid">
+                <div class="rule-card">
+                    <h3>Базовые баллы за сложность</h3>
+                    <table class="points-table">
+                        <thead>
+                            <tr><th>Сложность</th><th>Базовые баллы</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Изи демон</td><td>5</td></tr>
+                            <tr><td>Медиум демон</td><td>10</td></tr>
+                            <tr><td>Хард демон</td><td>15</td></tr>
+                            <tr><td>Инсейн демон</td><td>20</td></tr>
+                            <tr><td>Экстрим демон</td><td>30</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="rule-card">
+                    <h3>Модификаторы прогресса</h3>
+                    <ul class="rule-list">
+                        <li><strong>Прогресс ≤ 10%:</strong> Всегда даёт +5 баллов</li>
+                        <li><strong>Прогресс < 25%:</strong> Базовые баллы ÷ 2</li>
+                        <li><strong>Прогресс > 50%:</strong> +5 баллов</li>
+                        <li><strong>Длинный + прогресс > 50%:</strong> ещё +5 баллов</li>
+                    </ul>
+                </div>
+                <div class="rule-card">
+                    <h3>Примеры расчета</h3>
+                    <ul class="rule-list">
+                        <li><strong>Экстрим (30) на 8%:</strong> 5 баллов</li>
+                        <li><strong>Экстрим (30) на 20%:</strong> 15</li>
+                        <li><strong>Экстрим (30) на 60%:</strong> 40</li>
+                        <li><strong>Изи (5) на 15%:</strong> 2.5</li>
+                        <li><strong>Изи (5) на 80%:</strong> 15</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Рулетка демонов с KotGDPS • Создано для приватного сервера Geometry Dash</p>
+            <p class="footer-note">Страница сделана за авторством MirrorY. Если дипсик это написал, то он сосал</p>
+        </footer>
+    </div>
+
+    <script>
+        // ---------- БАЗА ДАННЫХ ----------
+        const customLevels = [
+            { id: 34,  name: "Only Cube Reprinted",   author: "MirrorY", difficulty: "easy",   difficultyText: "Easy", rating: 3, skillset: ["Тайминги", "Миррори геймплей"], preview: "ocr.jpg", staminaPoints: 5, long: false },
+            { id: 109, name: "The Dark ReMeow 0",     author: "MirrorY", difficulty: "easy",   difficultyText: "Easy", rating: 3, skillset: ["Тайминги", "Миррори геймплей"], preview: "tdrz.jpg", staminaPoints: 5, long: false },
+            { id: 79,  name: "Active",                author: "MirrorY", difficulty: "medium", difficultyText: "Medium", rating: 5, skillset: ["Тайминги", "Миррори геймплей"], preview: "a.jpg", staminaPoints: 10, long: false },
+            { id: 101, name: "Double Cube",           author: "MirrorY", difficulty: "medium", difficultyText: "Medium", rating: 5, skillset: ["Тайминги", "Дуалы", "Миррори геймплей", "Long"], preview: "dc.jpg", staminaPoints: 10, long: true },
+            { id: 31,  name: "bb circles",            author: "kesakuuta", difficulty: "medium", difficultyText: "Medium", rating: 5, skillset: ["NK стиль"], preview: "bb.png", staminaPoints: 10, long: false },
+            { id: 90,  name: "Passive",               author: "NAYSIK", difficulty: "insane", difficultyText: "Insane", rating: 7, skillset: ["Корабль и вейв", "Тайминги+Мемори"], preview: "p.webp", staminaPoints: 20, long: true },
+            { id: 46,  name: "lektbin",               author: "ToxicHQ", difficulty: "hard",   difficultyText: "Hard", rating: 6, skillset: ["Тайминги"], preview: "lek.jpg", staminaPoints: 15, long: false },
+            { id: 8,   name: "Herbvesulh",            author: "1nsainik", difficulty: "medium", difficultyText: "Medium", rating: 5, skillset: ["Реальный 1.0 геймплей", "Чокпойнты"], preview: "herbvesulh.jpg", staminaPoints: 10, long: true },
+            { id: 110, name: "Stereobaff",            author: "vhs", difficulty: "hard",   difficultyText: "Hard", rating: 6, skillset: ["Реальный 1.0 геймплей", "Стрейтфлаи"], preview: "st.jpg", staminaPoints: 15, long: false },
+            { id: 86,  name: "Degradation",           author: "MirrorY", difficulty: "hard",   difficultyText: "Hard", rating: 6, skillset: ["Миррори геймплей"], preview: "Degradation.webp", staminaPoints: 15, long: true },
+            { id: 26,  name: "toxic on track",        author: "[A] ToxiCRoboT (реплоад)", difficulty: "easy", difficultyText: "Easy", rating: 3, skillset: ["Мемори"], preview: "toxic_on_track.jpg", staminaPoints: 5, long: false }
+        ];
+
+        // Официальные уровни – ID = 0 (все)
+        const officialLevels = [
+            { id: 0, name: "Clubstep",            author: "RobTop", difficulty: "easy",   difficultyText: "Easy",   rating: 7, skillset: ["Тайминги", "Long"], preview: "rob.png", staminaPoints: 5,  long: true },
+            { id: 0, name: "Theory of Everything 2", author: "RobTop", difficulty: "medium", difficultyText: "Medium", rating: 8, skillset: ["Тайминги", "Мемори", "Long"], preview: "rob.png", staminaPoints: 10, long: true },
+            { id: 0, name: "Deadlocked",          author: "RobTop", difficulty: "medium", difficultyText: "Medium", rating: 9, skillset: ["Тайминги", "Дуалы", "Long"], preview: "rob.png", staminaPoints: 10, long: true }
+        ];
+
+        // ---------- DOM ----------
+        const setupPanel = document.getElementById('setup-panel');
+        const gamePanel = document.getElementById('game-panel');
+        const completionPanel = document.getElementById('completion-panel');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const optionCustom = document.getElementById('option-custom');
+        const optionMixed = document.getElementById('option-mixed');
+        const optionNoFluct = document.getElementById('option-no-fluct');
+        const optionFluct = document.getElementById('option-fluct');
+        const levelInfoElement = document.getElementById('level-info');
+        const levelNameElement = document.getElementById('level-name');
+        const levelAuthorElement = document.getElementById('level-author');
+        const levelIdElement = document.getElementById('level-id');
+        const levelDifficultyTag = document.getElementById('level-difficulty-tag');
+        const skillsetTagsElement = document.getElementById('skillset-tags');
+        const previewImage = document.getElementById('preview-image');
+        const requiredPercentageElement = document.getElementById('required-percentage');
+        const nextButton = document.getElementById('next-button');
+        const skipButton = document.getElementById('skip-button');
+        const giveUpButton = document.getElementById('give-up-button');
+        const fluctInput = document.getElementById('fluct-input');
+        const achievedPercentageInput = document.getElementById('achieved-percentage');
+        const levelsPassedElement = document.getElementById('levels-passed');
+        const currentProgressElement = document.getElementById('current-progress');
+        const gameModeElement = document.getElementById('game-mode');
+        const staminaPointsElement = document.getElementById('stamina-points');
+        const staminaBreakdownElement = document.getElementById('stamina-breakdown');
+        const historyContainer = document.getElementById('history-container');
+        const finalLevelsElement = document.getElementById('final-levels');
+        const finalProgressElement = document.getElementById('final-progress');
+        const finalModeElement = document.getElementById('final-mode');
+        const finalStaminaElement = document.getElementById('final-stamina');
+        const finalHistoryContainer = document.getElementById('final-history-container');
+
+        // ---------- ИГРОВЫЕ ПЕРЕМЕННЫЕ ----------
+        let gameActive = false;
+        let includeOfficial = false;
+        let fluctMode = false;
+        let currentRequirement = 1;
+        let levelsPassed = 0;
+        let staminaPoints = 0;
+        let allLevels = [];
+        let usedLevels = [];    // для custom — числа id, для official — строки "official_имя"
+        let history = [];
+        let currentLevel = null;
+        let levelSelectionAnimation = null;
+        let finalTestActive = false;
+        let surrenderedAtLevel = null;
+
+        // ---------- НАСТРОЙКИ ОПЦИЙ ----------
+        optionCustom.addEventListener('click', function() {
+            optionCustom.classList.add('selected');
+            optionMixed.classList.remove('selected');
+            document.getElementById('custom-only').checked = true;
+        });
+        optionMixed.addEventListener('click', function() {
+            optionMixed.classList.add('selected');
+            optionCustom.classList.remove('selected');
+            document.getElementById('mixed').checked = true;
+        });
+        optionNoFluct.addEventListener('click', function() {
+            optionNoFluct.classList.add('selected');
+            optionFluct.classList.remove('selected');
+            document.getElementById('no-fluct').checked = true;
+        });
+        optionFluct.addEventListener('click', function() {
+            optionFluct.classList.add('selected');
+            optionNoFluct.classList.remove('selected');
+            document.getElementById('fluct').checked = true;
+        });
+
+        // ---------- ФУНКЦИЯ ПОЛУЧЕНИЯ УНИКАЛЬНОГО КЛЮЧА ДЛЯ usedLevels ----------
+        function getLevelKey(level) {
+            if (level.id === 0) {
+                return `official_${level.name}`;
+            }
+            return level.id; // число
+        }
+
+        // ---------- ВЫБОР СЛУЧАЙНОГО УРОВНЯ ----------
+        function selectRandomLevel() {
+            if (usedLevels.length >= allLevels.length) {
+                usedLevels = [];
+            }
+
+            let availableLevels = allLevels.filter(level => {
+                const key = getLevelKey(level);
+                return !usedLevels.includes(key);
+            });
+
+            if (availableLevels.length === 0) {
+                availableLevels = allLevels;
+                usedLevels = [];
+            }
+
+            const randomIndex = Math.floor(Math.random() * availableLevels.length);
+            const selectedLevel = availableLevels[randomIndex];
+            usedLevels.push(getLevelKey(selectedLevel));
+
+            startLevelSelectionAnimation(selectedLevel);
+            currentLevel = selectedLevel;
+
+            history.push({
+                level: selectedLevel,
+                requirement: currentRequirement,
+                completed: false,
+                skipped: false
+            });
+        }
+
+        // ---------- АНИМАЦИЯ ПЕРЕКЛЮЧЕНИЯ ----------
+        function startLevelSelectionAnimation(finalLevel) {
+            let counter = 0;
+            const maxCycles = 15;
+            let lastLevel = null;
+            if (levelSelectionAnimation) clearInterval(levelSelectionAnimation);
+            levelSelectionAnimation = setInterval(() => {
+                const randomLevel = allLevels[Math.floor(Math.random() * allLevels.length)];
+                if (randomLevel.id !== lastLevel?.id) {
+                    updateLevelInfo(randomLevel, false);
+                    lastLevel = randomLevel;
+                }
+                counter++;
+                if (counter >= maxCycles) {
+                    clearInterval(levelSelectionAnimation);
+                    updateLevelInfo(finalLevel, true);
+                }
+            }, 50);
+        }
+
+        // ---------- ДОБАВЛЕНИЕ В ИСТОРИЮ (ПРОЙДЕННЫЙ УРОВЕНЬ) ----------
+        function addToHistory(level, requirement, skipped = false) {
+            const historyItem = history.find(item => 
+                item.level.id === level.id && item.requirement === requirement
+            );
+            if (historyItem) {
+                historyItem.completed = !skipped;
+                historyItem.skipped = skipped;
+            }
+            const historyElement = document.createElement('div');
+            historyElement.className = 'history-item';
+            const skippedText = skipped ? ' (пропуск)' : '';
+            historyElement.innerHTML = `
+                <div class="history-level-name">${level.name}${skippedText}</div>
+                <div class="history-percentage">${requirement}%</div>
+            `;
+            historyContainer.insertBefore(historyElement, historyContainer.firstChild);
+            historyContainer.scrollTop = 0;
+        }
+
+        // ---------- ОБНОВЛЕНИЕ ИНФОРМАЦИИ ОБ УРОВНЕ ----------
+        function updateLevelInfo(level, isFinal = false) {
+            levelNameElement.textContent = level.name;
+            levelAuthorElement.textContent = level.author;
+            levelIdElement.textContent = level.id;
+            levelDifficultyTag.textContent = level.difficultyText;
+            levelDifficultyTag.className = `difficulty-tag ${level.difficulty}-demon`;
+            skillsetTagsElement.innerHTML = '';
+            level.skillset.forEach(skill => {
+                const skillTag = document.createElement('div');
+                skillTag.className = 'skillset-tag';
+                skillTag.textContent = skill;
+                skillsetTagsElement.appendChild(skillTag);
+            });
+
+            if (isFinal) {
+                previewImage.style.opacity = '0';
+                setTimeout(() => {
+                    previewImage.src = level.preview;
+                    previewImage.alt = `Превью уровня ${level.name}`;
+                    previewImage.style.opacity = '1';
+                }, 10);
+            } else {
+                previewImage.style.opacity = '0.7';
+                previewImage.src = level.preview;
+                previewImage.alt = `Превью уровня ${level.name}`;
+            }
+
+            requiredPercentageElement.textContent = `${currentRequirement}%`;
+
+            if (currentRequirement === 100) {
+                levelInfoElement.classList.add('final-test');
+                finalTestActive = true;
+            } else {
+                levelInfoElement.classList.remove('final-test');
+                finalTestActive = false;
+            }
+        }
+
+        // ---------- РАСЧЁТ БАЛЛОВ СТОЙКОСТИ ----------
+        function calculateStaminaPoints(level, requirement, achievedPercent = null) {
+            const progressPercent = achievedPercent !== null ? achievedPercent : requirement;
+            if (progressPercent <= 10) return 5;
+            let points = level.staminaPoints || 0;
+            if (progressPercent < 25) points = Math.round((points / 2) * 10) / 10;
+            if (progressPercent > 50) points += 5;
+            if (level.long && progressPercent > 50) points += 5;
+            return points;
+        }
+
+        // ---------- ОБНОВЛЕНИЕ ОТОБРАЖЕНИЯ БАЛЛОВ ----------
+        function updateStaminaDisplay(pointsAdded, progressPercent = null) {
+            staminaPointsElement.textContent = staminaPoints.toFixed(1);
+            if (pointsAdded > 0) {
+                let breakdown = `+${pointsAdded.toFixed(1)} за ${currentLevel.difficultyText}`;
+                const progress = progressPercent || currentRequirement;
+                if (progress <= 10) breakdown = `+${pointsAdded.toFixed(1)} (правило ≤10%)`;
+                else if (progress < 25) breakdown += " (половинные баллы за прогресс < 25%)";
+                if (progress > 50) breakdown += " (+5 за прогресс > 50%)";
+                if (currentLevel.long && progress > 50) breakdown += " (+5 за длинный уровень)";
+                staminaBreakdownElement.innerHTML = breakdown;
+            }
+        }
+
+        // ---------- ОБРАБОТЧИК КНОПКИ "ДАЛЬШЕ" ----------
+        function nextButtonClickHandler() {
+            if (!gameActive || !currentLevel) return;
+
+            if (fluctMode) {
+                const achieved = parseInt(achievedPercentageInput.value);
+                if (isNaN(achieved) || achieved < 1 || achieved > 100) {
+                    alert("Введите корректный процент (1–100)!");
+                    return;
+                }
+                if (achieved < currentRequirement) {
+                    alert(`Вы не достигли ${currentRequirement}%!`);
+                    return;
+                }
+
+                // 100% – сразу финиш
+                if (achieved === 100) {
+                    const points = calculateStaminaPoints(currentLevel, currentRequirement, achieved);
+                    staminaPoints += points;
+                    updateStaminaDisplay(points, achieved);
+                    addToHistory(currentLevel, currentRequirement);
+                    finishGame(false);
+                    return;
+                }
+
+                // 99% -> переводим в финальный тест (100%) и выбираем НОВЫЙ уровень
+                if (achieved === 99) {
+                    const points = calculateStaminaPoints(currentLevel, currentRequirement, achieved);
+                    staminaPoints += points;
+                    updateStaminaDisplay(points, achieved);
+                    addToHistory(currentLevel, currentRequirement);
+                    
+                    // Увеличиваем прогресс до 100%
+                    currentRequirement = 100;
+                    levelsPassed++;
+                    
+                    // Обновляем статистику и интерфейс
+                    levelsPassedElement.textContent = levelsPassed;
+                    currentProgressElement.textContent = `${currentRequirement}%`;
+                    requiredPercentageElement.textContent = `${currentRequirement}%`;
+                    
+                    // Выбираем НОВЫЙ уровень для финального теста
+                    selectRandomLevel();
+                    
+                    // Добавляем класс final-test
+                    levelInfoElement.classList.add('final-test');
+                    
+                    // Меняем кнопку на "Завершить"
+                    nextButton.innerHTML = '<i class="fas fa-flag-checkered"></i> Завершить';
+                    nextButton.classList.remove('next-button');
+                    nextButton.classList.add('finish-button');
+                    
+                    // Обработчик завершения
+                    nextButton.onclick = function() {
+                        const pointsFin = calculateStaminaPoints(currentLevel, currentRequirement);
+                        staminaPoints += pointsFin;
+                        updateStaminaDisplay(pointsFin, currentRequirement);
+                        addToHistory(currentLevel, currentRequirement);
+                        finishGame(false);
+                    };
+                    
+                    achievedPercentageInput.value = "";
+                    return;
+                }
+
+                // Обычный случай (не 99, не 100)
+                const points = calculateStaminaPoints(currentLevel, currentRequirement, achieved);
+                staminaPoints += points;
+                updateStaminaDisplay(points, achieved);
+                addToHistory(currentLevel, currentRequirement);
+                currentRequirement = achieved + 1;
+                achievedPercentageInput.value = "";
+
+            } else {
+                // Режим БЕЗ флюков
+                const points = calculateStaminaPoints(currentLevel, currentRequirement);
+                staminaPoints += points;
+                updateStaminaDisplay(points, currentRequirement);
+                addToHistory(currentLevel, currentRequirement);
+                currentRequirement++;
+            }
+
+            // Увеличиваем счётчик пройденных уровней
+            levelsPassed++;
+
+            // Проверка на достижение 100% (без флюков или после обычного увеличения)
+            if (currentRequirement === 100) {
+                // Обновляем статистику
+                levelsPassedElement.textContent = levelsPassed;
+                currentProgressElement.textContent = `${currentRequirement}%`;
+                requiredPercentageElement.textContent = `${currentRequirement}%`;
+                
+                // Выбираем НОВЫЙ уровень для финального теста
+                selectRandomLevel();
+                
+                levelInfoElement.classList.add('final-test');
+                
+                nextButton.innerHTML = '<i class="fas fa-flag-checkered"></i> Завершить';
+                nextButton.classList.remove('next-button');
+                nextButton.classList.add('finish-button');
+                
+                nextButton.onclick = function() {
+                    const points = calculateStaminaPoints(currentLevel, currentRequirement);
+                    staminaPoints += points;
+                    updateStaminaDisplay(points, currentRequirement);
+                    addToHistory(currentLevel, currentRequirement);
+                    finishGame(false);
+                };
+                return;
+            }
+
+            // Если вдруг стало больше 100% (защита) — завершаем
+            if (currentRequirement > 100) {
+                finishGame(false);
+                return;
+            }
+
+            // Обновляем статистику и выбираем следующий уровень (если не финальный тест)
+            levelsPassedElement.textContent = levelsPassed;
+            currentProgressElement.textContent = `${currentRequirement}%`;
+            if (currentRequirement < 100) {
+                selectRandomLevel();
+            }
+        }
+
+        // ---------- КНОПКА "ПРОПУСК" ----------
+        skipButton.addEventListener('click', function() {
+            if (!gameActive || !currentLevel) return;
+
+            // Пропуск финального теста (100%) – штраф 15 баллов
+            if (currentRequirement === 100) {
+                const confirmSkip = confirm("Игнорирование последнего демона будет снято 15 баллов. Продолжить?");
+                if (!confirmSkip) return;
+                staminaPoints -= 15;
+                if (staminaPoints < 0) staminaPoints = 0;
+                staminaPointsElement.textContent = staminaPoints.toFixed(1);
+                staminaBreakdownElement.innerHTML = "-15 за игнорирование final test";
+            }
+
+            currentRequirement++;
+            addToHistory(currentLevel, currentRequirement - 1, true);
+            levelsPassed++;
+
+            if (currentRequirement !== 101) { // если не только что штрафанули
+                staminaBreakdownElement.innerHTML = "+0 за пропуск";
+            }
+
+            // Если после пропуска стало 100% – активируем финальный тест с НОВЫМ уровнем
+            if (currentRequirement === 100) {
+                levelsPassedElement.textContent = levelsPassed;
+                currentProgressElement.textContent = `${currentRequirement}%`;
+                requiredPercentageElement.textContent = `${currentRequirement}%`;
+                
+                selectRandomLevel();
+                levelInfoElement.classList.add('final-test');
+                
+                nextButton.innerHTML = '<i class="fas fa-flag-checkered"></i> Завершить';
+                nextButton.classList.remove('next-button');
+                nextButton.classList.add('finish-button');
+                
+                nextButton.onclick = function() {
+                    const points = calculateStaminaPoints(currentLevel, currentRequirement);
+                    staminaPoints += points;
+                    updateStaminaDisplay(points, currentRequirement);
+                    addToHistory(currentLevel, currentRequirement);
+                    finishGame(false);
+                };
+                return;
+            }
+
+            if (currentRequirement > 100) {
+                finishGame(false);
+                return;
+            }
+
+            levelsPassedElement.textContent = levelsPassed;
+            currentProgressElement.textContent = `${currentRequirement}%`;
+            if (currentRequirement < 100) {
+                selectRandomLevel();
+            }
+        });
+
+        // ---------- КНОПКА "СДАТЬСЯ" ----------
+        giveUpButton.addEventListener('click', function() {
+            if (confirm("Вы уверены, что хотите сдаться? Весь прогресс будет потерян.")) {
+                surrenderedAtLevel = { level: currentLevel, requirement: currentRequirement };
+                if (history.length > 0) {
+                    const lastItem = history[history.length - 1];
+                    lastItem.surrendered = true;
+                }
+                finishGame(true);
+            }
+        });
+
+        // ---------- ЗАВЕРШЕНИЕ ИГРЫ ----------
+        function finishGame(surrendered = false) {
+            gameActive = false;
+            finalLevelsElement.textContent = levelsPassed + (surrendered ? 0 : 1);
+            finalProgressElement.textContent = surrendered ? `${currentRequirement}%` : "100%";
+            finalModeElement.textContent = fluctMode ? "С флюками" : "Без флюков";
+
+            if (surrendered) {
+                finalStaminaElement.textContent = ":(";
+                finalStaminaElement.className = "stat-value sad";
+                completionPanel.classList.add('surrendered');
+                completionPanel.querySelector('h2').textContent = "Игра завершена";
+                completionPanel.querySelector('h3').textContent = "В следующий раз получится лучше!";
+                if (surrenderedAtLevel) {
+                    history.push({
+                        level: surrenderedAtLevel.level,
+                        requirement: surrenderedAtLevel.requirement,
+                        completed: false,
+                        surrendered: true
+                    });
+                }
+            } else {
+                finalStaminaElement.textContent = staminaPoints.toFixed(1);
+                finalStaminaElement.className = "stat-value";
+                completionPanel.classList.remove('surrendered');
+            }
+
+            displayFinalHistory(surrendered);
+            gamePanel.style.display = 'none';
+            completionPanel.style.display = 'block';
+        }
+
+        // ---------- ОТОБРАЖЕНИЕ ФИНАЛЬНОЙ ИСТОРИИ ----------
+        function displayFinalHistory(surrendered = false) {
+            finalHistoryContainer.innerHTML = '';
+
+            if (surrendered && surrenderedAtLevel) {
+                let difficultyClass = '';
+                switch(surrenderedAtLevel.level.difficulty) {
+                    case 'easy': difficultyClass = 'easy-demon'; break;
+                    case 'medium': difficultyClass = 'medium-demon'; break;
+                    case 'hard': difficultyClass = 'hard-demon'; break;
+                    case 'insane': difficultyClass = 'insane-demon'; break;
+                    case 'extreme': difficultyClass = 'extreme-demon'; break;
+                }
+                const histItem = document.createElement('div');
+                histItem.className = 'final-history-item';
+                histItem.innerHTML = `
+                    <div class="final-history-name">${surrenderedAtLevel.level.name} <span style="color:#ff4757">(сдался)</span></div>
+                    <div class="final-history-percentage">${surrenderedAtLevel.requirement}%</div>
+                    <div class="final-history-difficulty ${difficultyClass}">${surrenderedAtLevel.level.difficultyText}</div>
+                `;
+                finalHistoryContainer.appendChild(histItem);
+            }
+
+            history.forEach(item => {
+                if (surrendered && surrenderedAtLevel && 
+                    item.level.id === surrenderedAtLevel.level.id && 
+                    item.requirement === surrenderedAtLevel.requirement) {
+                    return;
+                }
+                let difficultyClass = '';
+                switch(item.level.difficulty) {
+                    case 'easy': difficultyClass = 'easy-demon'; break;
+                    case 'medium': difficultyClass = 'medium-demon'; break;
+                    case 'hard': difficultyClass = 'hard-demon'; break;
+                    case 'insane': difficultyClass = 'insane-demon'; break;
+                    case 'extreme': difficultyClass = 'extreme-demon'; break;
+                }
+                let status = "", statusColor = "#aaa";
+                if (item.completed) { status = ""; statusColor = "#32CD32"; }
+                else if (item.surrendered) { status = " (сдался)"; statusColor = "#ff4757"; }
+                else if (item.skipped) { status = " (пропущен)"; statusColor = "#1E90FF"; }
+                else { status = " (не пройден)"; statusColor = "#aaa"; }
+
+                const histItem = document.createElement('div');
+                histItem.className = 'final-history-item';
+                histItem.innerHTML = `
+                    <div class="final-history-name">${item.level.name} <span style="color:${statusColor}">${status}</span></div>
+                    <div class="final-history-percentage">${item.requirement}%</div>
+                    <div class="final-history-difficulty ${difficultyClass}">${item.level.difficultyText}</div>
+                `;
+                finalHistoryContainer.appendChild(histItem);
+            });
+        }
+
+        // ---------- НАЧАЛО ИГРЫ ----------
+        startButton.addEventListener('click', function() {
+            includeOfficial = document.getElementById('mixed').checked;
+            fluctMode = document.getElementById('fluct').checked;
+            allLevels = [...customLevels];
+            if (includeOfficial) allLevels = [...allLevels, ...officialLevels];
+
+            gameActive = true;
+            currentRequirement = 1;
+            levelsPassed = 0;
+            staminaPoints = 0;
+            usedLevels = [];
+            history = [];
+            finalTestActive = false;
+            surrenderedAtLevel = null;
+            historyContainer.innerHTML = '';
+
+            gameModeElement.textContent = fluctMode ? "С флюками" : "Без флюков";
+            levelsPassedElement.textContent = levelsPassed;
+            currentProgressElement.textContent = `${currentRequirement}%`;
+            requiredPercentageElement.textContent = `${currentRequirement}%`;
+            staminaPointsElement.textContent = staminaPoints.toFixed(1);
+            staminaBreakdownElement.innerHTML = '';
+            levelInfoElement.classList.remove('final-test');
+
+            if (fluctMode) {
+                fluctInput.style.display = 'block';
+                achievedPercentageInput.value = "";
+            } else {
+                fluctInput.style.display = 'none';
+            }
+
+            selectRandomLevel();
+
+            setupPanel.style.display = 'none';
+            gamePanel.style.display = 'block';
+            completionPanel.style.display = 'none';
+
+            nextButton.innerHTML = '<i class="fas fa-forward"></i> Дальше';
+            nextButton.classList.remove('finish-button');
+            nextButton.classList.add('next-button');
+            nextButton.onclick = nextButtonClickHandler;
+        });
+
+        // ---------- КНОПКА "НАЧАТЬ ЗАНОВО" ----------
+        restartButton.addEventListener('click', function() {
+            completionPanel.style.display = 'none';
+            setupPanel.style.display = 'block';
+            nextButton.innerHTML = '<i class="fas fa-forward"></i> Дальше';
+            nextButton.classList.remove('finish-button');
+            nextButton.classList.add('next-button');
+            nextButton.onclick = nextButtonClickHandler;
+            completionPanel.classList.remove('surrendered');
+            completionPanel.querySelector('h2').textContent = "Поздравляем!";
+            completionPanel.querySelector('h3').textContent = "Вы успешно завершили рулетку демонов!";
+        });
+
+        // ---------- ИНИЦИАЛИЗАЦИЯ ----------
+        window.addEventListener('load', function() {
+            optionCustom.classList.add('selected');
+            optionNoFluct.classList.add('selected');
+            nextButton.onclick = nextButtonClickHandler;
+        });
+    </script>
+</body>
+</html>
