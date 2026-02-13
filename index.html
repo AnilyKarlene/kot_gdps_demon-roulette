@@ -963,7 +963,7 @@
         </div>
         
         <footer>
-            <p>Рулетка демонов с KotGDPS • Создано для приватного сервера Geometry Dash • Выложено на вонючий Гитхаб от Anily Karlene</p>
+            <p>Рулетка демонов с KotGDPS • Создано для приватного сервера Geometry Dash</p>
             <p class="footer-note">Страница сделана за авторством MirrorY. Если дипсик это написал, то он сосал</p>
         </footer>
     </div>
@@ -971,17 +971,18 @@
     <script>
         // ---------- БАЗА ДАННЫХ ----------
         const customLevels = [
-            { id: 34,  name: "Only Cube Reprinted",   author: "MirrorY", difficulty: "easy",   difficultyText: "Easy", rating: 3, skillset: ["Тайминги", "Миррори геймплей"], preview: "ocr.jpg", staminaPoints: 5, long: false },
-            { id: 109, name: "The Dark ReMeow 0",     author: "MirrorY", difficulty: "easy",   difficultyText: "Easy", rating: 3, skillset: ["Тайминги", "Миррори геймплей"], preview: "tdrz.jpg", staminaPoints: 5, long: false },
-            { id: 79,  name: "Active",                author: "MirrorY", difficulty: "medium", difficultyText: "Medium", rating: 5, skillset: ["Тайминги", "Миррори геймплей"], preview: "a.jpg", staminaPoints: 10, long: false },
-            { id: 101, name: "Double Cube",           author: "MirrorY", difficulty: "medium", difficultyText: "Medium", rating: 5, skillset: ["Тайминги", "Дуалы", "Миррори геймплей", "Long"], preview: "dc.jpg", staminaPoints: 10, long: true },
-            { id: 31,  name: "bb circles",            author: "kesakuuta", difficulty: "medium", difficultyText: "Medium", rating: 5, skillset: ["NK стиль"], preview: "bb.png", staminaPoints: 10, long: false },
-            { id: 90,  name: "Passive",               author: "NAYSIK", difficulty: "insane", difficultyText: "Insane", rating: 7, skillset: ["Корабль и вейв", "Тайминги+Мемори"], preview: "p.webp", staminaPoints: 20, long: true },
-            { id: 46,  name: "lektbin",               author: "ToxicHQ", difficulty: "hard",   difficultyText: "Hard", rating: 6, skillset: ["Тайминги"], preview: "lek.jpg", staminaPoints: 15, long: false },
-            { id: 8,   name: "Herbvesulh",            author: "1nsainik", difficulty: "medium", difficultyText: "Medium", rating: 5, skillset: ["Реальный 1.0 геймплей", "Чокпойнты"], preview: "herbvesulh.jpg", staminaPoints: 10, long: true },
-            { id: 110, name: "Stereobaff",            author: "vhs", difficulty: "hard",   difficultyText: "Hard", rating: 6, skillset: ["Реальный 1.0 геймплей", "Стрейтфлаи"], preview: "st.jpg", staminaPoints: 15, long: false },
-            { id: 86,  name: "Degradation",           author: "MirrorY", difficulty: "hard",   difficultyText: "Hard", rating: 6, skillset: ["Миррори геймплей"], preview: "Degradation.webp", staminaPoints: 15, long: true },
-            { id: 26,  name: "toxic on track",        author: "[A] ToxiCRoboT (реплоад)", difficulty: "easy", difficultyText: "Easy", rating: 3, skillset: ["Мемори"], preview: "toxic_on_track.jpg", staminaPoints: 5, long: false }
+            { id: 34,  name: "Only Cube Reprinted",   author: "MirrorY", difficulty: "easy",   difficultyText: "Easy demon", rating: 3, skillset: ["Тайминги", "Миррори геймплей"], preview: "ocr.jpg", staminaPoints: 5, long: false },
+            { id: 109, name: "The Dark ReMeow 0",     author: "MirrorY", difficulty: "easy",   difficultyText: "Easy demon", rating: 3, skillset: ["Тайминги", "Миррори геймплей"], preview: "tdrz.jpg", staminaPoints: 5, long: false },
+            { id: 79,  name: "Active",                author: "MirrorY", difficulty: "medium", difficultyText: "Medium demon", rating: 5, skillset: ["Тайминги", "Миррори геймплей"], preview: "a.jpg", staminaPoints: 10, long: false },
+            { id: 101, name: "Double Cube",           author: "MirrorY", difficulty: "medium", difficultyText: "Medium demon", rating: 5, skillset: ["Тайминги", "Дуалы", "Миррори геймплей", "Long"], preview: "dc.jpg", staminaPoints: 10, long: true },
+            { id: 31,  name: "bb circles",            author: "kesakuuta", difficulty: "medium", difficultyText: "Medium demon", rating: 5, skillset: ["NK стиль"], preview: "bb.png", staminaPoints: 10, long: false },
+            { id: 90,  name: "Passive",               author: "NAYSIK", difficulty: "insane", difficultyText: "Insane demon", rating: 7, skillset: ["Корабль и вейв", "Тайминги+Мемори"], preview: "p.webp", staminaPoints: 20, long: true },
+            { id: 46,  name: "lektbin",               author: "ToxicHQ", difficulty: "hard",   difficultyText: "Hard demon", rating: 6, skillset: ["Тайминги"], preview: "lek.jpg", staminaPoints: 15, long: false },
+            { id: 8,   name: "Herbvesulh",            author: "1nsainik", difficulty: "medium", difficultyText: "Medium demon", rating: 5, skillset: ["Реальный 1.0 геймплей", "Чокпойнты"], preview: "herbvesulh.jpg", staminaPoints: 10, long: true },
+            { id: 110, name: "Stereobaff",            author: "vhs", difficulty: "hard",   difficultyText: "Hard demon", rating: 6, skillset: ["Реальный 1.0 геймплей", "Стрейтфлаи"], preview: "st.jpg", staminaPoints: 15, long: false },
+            { id: 86,  name: "Degradation",           author: "MirrorY", difficulty: "hard",   difficultyText: "Hard demon", rating: 6, skillset: ["Миррори геймплей"], preview: "Degradation.webp", staminaPoints: 15, long: true },
+            { id: 26,  name: "toxic on track",        author: "[A] ToxiCRoboT (реплоад)", difficulty: "easy", difficultyText: "Easy demon", rating: 3, skillset: ["Мемори"], preview: "toxic_on_track.jpg", staminaPoints: 5, long: false },
+            { id: 113,  name: "Ranaldu Bals",        author: "NAYSIK", difficulty: "hard", difficultyText: "Hard demon", rating: 6, skillset: ["NK стиль"], preview: "bals.webp", staminaPoints: 15, long: true }
         ];
 
         // Официальные уровни – ID = 0 (все)
