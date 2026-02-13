@@ -820,6 +820,18 @@
                         <label for="fluct">С флюками (ввод достигнутого процента)</label>
                     </div>
                 </div>
+                <!-- НОВЫЙ БЛОК: Негативный пропуск -->
+                <div class="option-group">
+                    <h3><i class="fas fa-skull"></i> Негативный пропуск</h3>
+                    <div class="option" id="option-negative-off">
+                        <input type="radio" id="negative-off" name="negative-skip" value="off" checked>
+                        <label for="negative-off">Выключен (пропуск = 0 баллов)</label>
+                    </div>
+                    <div class="option" id="option-negative-on">
+                        <input type="radio" id="negative-on" name="negative-skip" value="on">
+                        <label for="negative-on">Включён (штраф = стоимость уровня)</label>
+                    </div>
+                </div>
             </div>
             <button class="start-button" id="start-button">
                 <i class="fas fa-play"></i> Начать пытку
@@ -1002,6 +1014,10 @@
         const optionMixed = document.getElementById('option-mixed');
         const optionNoFluct = document.getElementById('option-no-fluct');
         const optionFluct = document.getElementById('option-fluct');
+        // Новые опции
+        const optionNegativeOff = document.getElementById('option-negative-off');
+        const optionNegativeOn = document.getElementById('option-negative-on');
+
         const levelInfoElement = document.getElementById('level-info');
         const levelNameElement = document.getElementById('level-name');
         const levelAuthorElement = document.getElementById('level-author');
@@ -1031,6 +1047,7 @@
         let gameActive = false;
         let includeOfficial = false;
         let fluctMode = false;
+        let negativeSkip = false;           // новая переменная
         let currentRequirement = 1;
         let levelsPassed = 0;
         let staminaPoints = 0;
@@ -1062,6 +1079,17 @@
             optionFluct.classList.add('selected');
             optionNoFluct.classList.remove('selected');
             document.getElementById('fluct').checked = true;
+        });
+        // Новые обработчики для негативного пропуска
+        optionNegativeOff.addEventListener('click', function() {
+            optionNegativeOff.classList.add('selected');
+            optionNegativeOn.classList.remove('selected');
+            document.getElementById('negative-off').checked = true;
+        });
+        optionNegativeOn.addEventListener('click', function() {
+            optionNegativeOn.classList.add('selected');
+            optionNegativeOff.classList.remove('selected');
+            document.getElementById('negative-on').checked = true;
         });
 
         // ---------- ФУНКЦИЯ ПОЛУЧЕНИЯ УНИКАЛЬНОГО КЛЮЧА ДЛЯ usedLevels ----------
@@ -1332,29 +1360,34 @@
             }
         }
 
-        // ---------- КНОПКА "ПРОПУСК" ----------
+        // ---------- КНОПКА "ПРОПУСК" (обновлённая с учётом negativeSkip) ----------
         skipButton.addEventListener('click', function() {
             if (!gameActive || !currentLevel) return;
 
-            // Пропуск финального теста (100%) – штраф 15 баллов
-            if (currentRequirement === 100) {
-                const confirmSkip = confirm("Игнорирование последнего демона будет снято 15 баллов. Продолжить?");
-                if (!confirmSkip) return;
-                staminaPoints -= 15;
-                if (staminaPoints < 0) staminaPoints = 0;
-                staminaPointsElement.textContent = staminaPoints.toFixed(1);
-                staminaBreakdownElement.innerHTML = "-15 за игнорирование final test";
+            // Рассчитываем штраф, если включён негативный пропуск
+            let penalty = 0;
+            if (negativeSkip) {
+                penalty = calculateStaminaPoints(currentLevel, currentRequirement);
+                penalty = Math.round(penalty * 10) / 10; // округление до десятых
             }
 
+            // Если негативный режим включён, запрашиваем подтверждение
+            if (negativeSkip) {
+                const message = `Пропуск уровня снимет ${penalty.toFixed(1)} баллов стойкости. Продолжить?`;
+                if (!confirm(message)) return;
+                staminaPoints = Math.max(0, staminaPoints - penalty);
+                staminaPointsElement.textContent = staminaPoints.toFixed(1);
+                staminaBreakdownElement.innerHTML = `-${penalty.toFixed(1)} за пропуск (негативный режим)`;
+            } else {
+                staminaBreakdownElement.innerHTML = "+0 за пропуск";
+            }
+
+            // Увеличиваем требование, добавляем в историю, увеличиваем счётчик уровней
             currentRequirement++;
             addToHistory(currentLevel, currentRequirement - 1, true);
             levelsPassed++;
 
-            if (currentRequirement !== 101) { // если не только что штрафанули
-                staminaBreakdownElement.innerHTML = "+0 за пропуск";
-            }
-
-            // Если после пропуска стало 100% – активируем финальный тест с НОВЫМ уровнем
+            // Проверка на достижение 100%
             if (currentRequirement === 100) {
                 levelsPassedElement.textContent = levelsPassed;
                 currentProgressElement.textContent = `${currentRequirement}%`;
@@ -1384,9 +1417,7 @@
 
             levelsPassedElement.textContent = levelsPassed;
             currentProgressElement.textContent = `${currentRequirement}%`;
-            if (currentRequirement < 100) {
-                selectRandomLevel();
-            }
+            selectRandomLevel();
         });
 
         // ---------- КНОПКА "СДАТЬСЯ" ----------
@@ -1491,6 +1522,8 @@
         startButton.addEventListener('click', function() {
             includeOfficial = document.getElementById('mixed').checked;
             fluctMode = document.getElementById('fluct').checked;
+            negativeSkip = document.getElementById('negative-on').checked; // считываем новую опцию
+
             allLevels = [...customLevels];
             if (includeOfficial) allLevels = [...allLevels, ...officialLevels];
 
@@ -1548,6 +1581,7 @@
         window.addEventListener('load', function() {
             optionCustom.classList.add('selected');
             optionNoFluct.classList.add('selected');
+            optionNegativeOff.classList.add('selected'); // по умолчанию негативный пропуск выключен
             nextButton.onclick = nextButtonClickHandler;
         });
     </script>
