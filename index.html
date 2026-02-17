@@ -6,7 +6,7 @@
     <title>Рулетка демонов с KotGDPS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- Стили без изменений (полностью из предыдущего ответа) --- */
+        /* --- Стили без изменений --- */
         * {
             margin: 0;
             padding: 0;
@@ -334,6 +334,16 @@
         
         .easy-demon {
             background: linear-gradient(to right, #1E90FF, #87CEEB);
+            color: white;
+        }
+        
+        .insane-non-demon {
+            background: linear-gradient(to right, #9932CC, #BA55D3);
+            color: white;
+        }
+        
+        .na-difficulty {
+            background: linear-gradient(to right, #696969, #A9A9A9);
             color: white;
         }
         
@@ -809,6 +819,20 @@
                         <label for="mixed">Пользовательские + уровни RobTop</label>
                     </div>
                 </div>
+
+                <!-- Побочные типы уровней -->
+                <div class="option-group">
+                    <h3><i class="fas fa-layer-group"></i> Побочные типы уровней</h3>
+                    <div class="option" id="option-below-easy">
+                        <input type="checkbox" id="below-easy" value="below-easy">
+                        <label for="below-easy">Допускать уровни ниже изи демона</label>
+                    </div>
+                    <div class="option" id="option-no-stars">
+                        <input type="checkbox" id="no-stars" value="no-stars">
+                        <label for="no-stars">Допускать уровни без звёзд</label>
+                    </div>
+                </div>
+
                 <div class="option-group">
                     <h3><i class="fas fa-chart-line"></i> Режим прогресса</h3>
                     <div class="option" id="option-no-fluct">
@@ -820,7 +844,8 @@
                         <label for="fluct">С флюками (ввод достигнутого процента)</label>
                     </div>
                 </div>
-                <!-- НОВЫЙ БЛОК: Негативный пропуск -->
+
+                <!-- Негативный пропуск -->
                 <div class="option-group">
                     <h3><i class="fas fa-skull"></i> Негативный пропуск</h3>
                     <div class="option" id="option-negative-off">
@@ -949,16 +974,19 @@
                             <tr><td>Хард демон</td><td>15</td></tr>
                             <tr><td>Инсейн демон</td><td>20</td></tr>
                             <tr><td>Экстрим демон</td><td>30</td></tr>
+                            <tr><td>Ниже изи демона (Insane)</td><td>2.5</td></tr>
+                            <tr><td>Без звёзд (N/A)</td><td>индивидуально</td></tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="rule-card">
                     <h3>Модификаторы прогресса</h3>
                     <ul class="rule-list">
-                        <li><strong>Прогресс ≤ 10%:</strong> Всегда даёт +5 баллов</li>
-                        <li><strong>Прогресс < 25%:</strong> Базовые баллы ÷ 2</li>
-                        <li><strong>Прогресс > 50%:</strong> +5 баллов</li>
-                        <li><strong>Длинный + прогресс > 50%:</strong> ещё +5 баллов</li>
+                        <li><strong>Прогресс ≤ 10%:</strong> Всегда даёт +5 баллов (кроме уровней ниже изи демона)</li>
+                        <li><strong>Прогресс < 25%:</strong> Для демонов – базовые баллы ÷ 2</li>
+                        <li><strong>Прогресс > 50%:</strong> +5 баллов (только для демонов)</li>
+                        <li><strong>Длинный + прогресс > 50%:</strong> ещё +5 баллов (только для демонов)</li>
+                        <li><strong>Уровни ниже изи демона:</strong> менее 25% – 0 баллов, 25% и более – 2.5 балла</li>
                     </ul>
                 </div>
                 <div class="rule-card">
@@ -969,6 +997,8 @@
                         <li><strong>Экстрим (30) на 60%:</strong> 40</li>
                         <li><strong>Изи (5) на 15%:</strong> 2.5</li>
                         <li><strong>Изи (5) на 80%:</strong> 15</li>
+                        <li><strong>Ниже изи (2.5) на 30%:</strong> 2.5</li>
+                        <li><strong>Ниже изи (2.5) на 10%:</strong> 0</li>
                     </ul>
                 </div>
             </div>
@@ -982,6 +1012,7 @@
 
     <script>
         // ---------- БАЗА ДАННЫХ ----------
+        // Основные демоны (пользовательские)
         const customLevels = [
             { id: 34,  name: "Only Cube Reprinted",   author: "MirrorY", difficulty: "easy",   difficultyText: "Easy demon", rating: 3, skillset: ["Тайминги", "Миррори геймплей"], preview: "ocr.jpg", staminaPoints: 5, long: false },
             { id: 109, name: "The Dark ReMeow 0",     author: "MirrorY", difficulty: "easy",   difficultyText: "Easy demon", rating: 3, skillset: ["Тайминги", "Миррори геймплей"], preview: "tdrz.jpg", staminaPoints: 5, long: false },
@@ -994,14 +1025,28 @@
             { id: 110, name: "Stereobaff",            author: "vhs", difficulty: "hard",   difficultyText: "Hard demon", rating: 6, skillset: ["Реальный 1.0 геймплей", "Стрейтфлаи"], preview: "st.jpg", staminaPoints: 15, long: false },
             { id: 86,  name: "Degradation",           author: "MirrorY", difficulty: "hard",   difficultyText: "Hard demon", rating: 6, skillset: ["Миррори геймплей"], preview: "Degradation.webp", staminaPoints: 15, long: true },
             { id: 26,  name: "toxic on track",        author: "[A] ToxiCRoboT (реплоад)", difficulty: "easy", difficultyText: "Easy demon", rating: 3, skillset: ["Мемори"], preview: "toxic_on_track.jpg", staminaPoints: 5, long: false },
-            { id: 113,  name: "Ranaldu Bals",        author: "NAYSIK", difficulty: "hard", difficultyText: "Hard demon", rating: 6, skillset: ["NK стиль"], preview: "bals.webp", staminaPoints: 15, long: true }
+            { id: 113, name: "Ranaldu Bals",          author: "NAYSIK", difficulty: "hard", difficultyText: "Hard demon", rating: 6, skillset: ["NK стиль"], preview: "bals.webp", staminaPoints: 15, long: true },
+            { id: 130, name: "N O T F O R M E",       author: "MirrorY (verified by NAYSIK)", difficulty: "extreme", difficultyText: "Extreme demon", rating: 10, skillset: ["Тайминги", "Миррори геймплей"], preview: "nfm.webp", staminaPoints: 30, long: true },
+            { id: 129, name: "Prisma",                 author: "MirrorY / Likeria (реплоад)", difficulty: "insane", difficultyText: "Insane demon", rating: 7, skillset: ["Корабль и НЛО", "Тайминги", "Миррори геймплей"], preview: "prisma.jpg", staminaPoints: 20, long: false }
         ];
 
         // Официальные уровни – ID = 0 (все)
         const officialLevels = [
-            { id: 0, name: "Clubstep",            author: "RobTop", difficulty: "easy",   difficultyText: "Easy",   rating: 7, skillset: ["Тайминги", "Long"], preview: "rob.png", staminaPoints: 5,  long: true },
-            { id: 0, name: "Theory of Everything 2", author: "RobTop", difficulty: "medium", difficultyText: "Medium", rating: 8, skillset: ["Тайминги", "Мемори", "Long"], preview: "rob.png", staminaPoints: 10, long: true },
-            { id: 0, name: "Deadlocked",          author: "RobTop", difficulty: "medium", difficultyText: "Medium", rating: 9, skillset: ["Тайминги", "Дуалы", "Long"], preview: "rob.png", staminaPoints: 10, long: true }
+            { id: 0, name: "Clubstep",            author: "RobTop", difficulty: "easy",   difficultyText: "Easy demon",   rating: 7, skillset: ["Тайминги", "Long"], preview: "rob.png", staminaPoints: 5,  long: true },
+            { id: 0, name: "Theory of Everything 2", author: "RobTop", difficulty: "medium", difficultyText: "Medium demon", rating: 8, skillset: ["Тайминги", "Мемори", "Long"], preview: "rob.png", staminaPoints: 10, long: true },
+            { id: 0, name: "Deadlocked",          author: "RobTop", difficulty: "medium", difficultyText: "Medium demon", rating: 9, skillset: ["Тайминги", "Дуалы", "Long"], preview: "rob.png", staminaPoints: 10, long: true }
+        ];
+
+        // Уровни ниже изи демона (Insane, 9 звёзд)
+        const belowEasyLevels = [
+            { id: 117, name: "inlea",              author: "ToxicHQ", difficulty: "insane_non", difficultyText: "Insane", rating: 9, skillset: ["Корабль и вейв", "Тайминги"], preview: "inlea.webp", staminaPoints: 2.5, long: false },
+            { id: 54,  name: "Aluminium Adventure", author: "MirrorY", difficulty: "insane_non", difficultyText: "Insane", rating: 9, skillset: ["NK стиль", "Свинг"], preview: "aa.jpg", staminaPoints: 2.5, long: true },
+            { id: 5,   name: "Omnis Finis",         author: "ToxicHQ", difficulty: "insane_non", difficultyText: "Insane", rating: 9, skillset: ["Корабль", "Частично 1.0 геймплей"], preview: "om.jpg", staminaPoints: 2.5, long: false }
+        ];
+
+        // Уровни без звёзд (N/A)
+        const noStarsLevels = [
+            { id: 118, name: "Silent penis",        author: "vhs", difficulty: "na", difficultyText: "N/A", rating: 0, skillset: ["Тайминги", "Чокпойнты"], preview: "sp.webp", staminaPoints: 15, long: false } // приравнен к хард демону
         ];
 
         // ---------- DOM ----------
@@ -1014,7 +1059,10 @@
         const optionMixed = document.getElementById('option-mixed');
         const optionNoFluct = document.getElementById('option-no-fluct');
         const optionFluct = document.getElementById('option-fluct');
-        // Новые опции
+        const optionBelowEasy = document.getElementById('option-below-easy');
+        const belowEasyCheckbox = document.getElementById('below-easy');
+        const optionNoStars = document.getElementById('option-no-stars');
+        const noStarsCheckbox = document.getElementById('no-stars');
         const optionNegativeOff = document.getElementById('option-negative-off');
         const optionNegativeOn = document.getElementById('option-negative-on');
 
@@ -1047,7 +1095,7 @@
         let gameActive = false;
         let includeOfficial = false;
         let fluctMode = false;
-        let negativeSkip = false;           // новая переменная
+        let negativeSkip = false;
         let currentRequirement = 1;
         let levelsPassed = 0;
         let staminaPoints = 0;
@@ -1070,6 +1118,24 @@
             optionCustom.classList.remove('selected');
             document.getElementById('mixed').checked = true;
         });
+
+        optionBelowEasy.addEventListener('click', function(e) {
+            belowEasyCheckbox.checked = !belowEasyCheckbox.checked;
+            if (belowEasyCheckbox.checked) {
+                optionBelowEasy.classList.add('selected');
+            } else {
+                optionBelowEasy.classList.remove('selected');
+            }
+        });
+        optionNoStars.addEventListener('click', function(e) {
+            noStarsCheckbox.checked = !noStarsCheckbox.checked;
+            if (noStarsCheckbox.checked) {
+                optionNoStars.classList.add('selected');
+            } else {
+                optionNoStars.classList.remove('selected');
+            }
+        });
+
         optionNoFluct.addEventListener('click', function() {
             optionNoFluct.classList.add('selected');
             optionFluct.classList.remove('selected');
@@ -1080,7 +1146,7 @@
             optionNoFluct.classList.remove('selected');
             document.getElementById('fluct').checked = true;
         });
-        // Новые обработчики для негативного пропуска
+
         optionNegativeOff.addEventListener('click', function() {
             optionNegativeOff.classList.add('selected');
             optionNegativeOn.classList.remove('selected');
@@ -1092,12 +1158,12 @@
             document.getElementById('negative-on').checked = true;
         });
 
-        // ---------- ФУНКЦИЯ ПОЛУЧЕНИЯ УНИКАЛЬНОГО КЛЮЧА ДЛЯ usedLevels ----------
+        // ---------- ФУНКЦИЯ ПОЛУЧЕНИЯ УНИКАЛЬНОГО КЛЮЧА ----------
         function getLevelKey(level) {
             if (level.id === 0) {
                 return `official_${level.name}`;
             }
-            return level.id; // число
+            return level.id;
         }
 
         // ---------- ВЫБОР СЛУЧАЙНОГО УРОВНЯ ----------
@@ -1131,7 +1197,7 @@
             });
         }
 
-        // ---------- АНИМАЦИЯ ПЕРЕКЛЮЧЕНИЯ ----------
+        // ---------- АНИМАЦИЯ ----------
         function startLevelSelectionAnimation(finalLevel) {
             let counter = 0;
             const maxCycles = 15;
@@ -1151,7 +1217,7 @@
             }, 50);
         }
 
-        // ---------- ДОБАВЛЕНИЕ В ИСТОРИЮ (ПРОЙДЕННЫЙ УРОВЕНЬ) ----------
+        // ---------- ДОБАВЛЕНИЕ В ИСТОРИЮ ----------
         function addToHistory(level, requirement, skipped = false) {
             const historyItem = history.find(item => 
                 item.level.id === level.id && item.requirement === requirement
@@ -1177,7 +1243,20 @@
             levelAuthorElement.textContent = level.author;
             levelIdElement.textContent = level.id;
             levelDifficultyTag.textContent = level.difficultyText;
-            levelDifficultyTag.className = `difficulty-tag ${level.difficulty}-demon`;
+
+            let diffClass = '';
+            switch(level.difficulty) {
+                case 'easy': diffClass = 'easy-demon'; break;
+                case 'medium': diffClass = 'medium-demon'; break;
+                case 'hard': diffClass = 'hard-demon'; break;
+                case 'insane': diffClass = 'insane-demon'; break;
+                case 'extreme': diffClass = 'extreme-demon'; break;
+                case 'insane_non': diffClass = 'insane-non-demon'; break;
+                case 'na': diffClass = 'na-difficulty'; break;
+                default: diffClass = 'easy-demon';
+            }
+            levelDifficultyTag.className = `difficulty-tag ${diffClass}`;
+
             skillsetTagsElement.innerHTML = '';
             level.skillset.forEach(skill => {
                 const skillTag = document.createElement('div');
@@ -1210,9 +1289,23 @@
             }
         }
 
-        // ---------- РАСЧЁТ БАЛЛОВ СТОЙКОСТИ ----------
+        // ---------- РАСЧЁТ БАЛЛОВ СТОЙКОСТИ (с обновлённой логикой) ----------
         function calculateStaminaPoints(level, requirement, achievedPercent = null) {
             const progressPercent = achievedPercent !== null ? achievedPercent : requirement;
+
+            // Специальная обработка для уровней ниже изи демона (insane_non) и для N/A с базой 2.5
+            const isLowLevel = (level.difficulty === 'insane_non') || 
+                               (level.difficulty === 'na' && level.staminaPoints <= 2.5);
+            
+            if (isLowLevel) {
+                if (progressPercent < 25) {
+                    return 0; // нет баллов за прогресс ниже 25%
+                } else {
+                    return level.staminaPoints; // фиксированное значение (2.5)
+                }
+            }
+
+            // Обычная логика для демонов (включая Silent penis с базой 15)
             if (progressPercent <= 10) return 5;
             let points = level.staminaPoints || 0;
             if (progressPercent < 25) points = Math.round((points / 2) * 10) / 10;
@@ -1221,18 +1314,49 @@
             return points;
         }
 
-        // ---------- ОБНОВЛЕНИЕ ОТОБРАЖЕНИЯ БАЛЛОВ ----------
+        // ---------- ОБНОВЛЕНИЕ ОТОБРАЖЕНИЯ БАЛЛОВ (с подробными комментариями) ----------
         function updateStaminaDisplay(pointsAdded, progressPercent = null) {
             staminaPointsElement.textContent = staminaPoints.toFixed(1);
+            const progress = progressPercent || currentRequirement;
+
+            // Определяем тип уровня для информационных сообщений
+            const isLowLevel = (currentLevel.difficulty === 'insane_non') || 
+                               (currentLevel.difficulty === 'na' && currentLevel.staminaPoints <= 2.5);
+            const isSpecialNA = (currentLevel.difficulty === 'na' && currentLevel.staminaPoints > 2.5); // Silent penis
+
+            let breakdown = '';
+
             if (pointsAdded > 0) {
-                let breakdown = `+${pointsAdded.toFixed(1)} за ${currentLevel.difficultyText}`;
-                const progress = progressPercent || currentRequirement;
-                if (progress <= 10) breakdown = `+${pointsAdded.toFixed(1)} (правило ≤10%)`;
-                else if (progress < 25) breakdown += " (половинные баллы за прогресс < 25%)";
-                if (progress > 50) breakdown += " (+5 за прогресс > 50%)";
-                if (currentLevel.long && progress > 50) breakdown += " (+5 за длинный уровень)";
-                staminaBreakdownElement.innerHTML = breakdown;
+                breakdown = `+${pointsAdded.toFixed(1)} за ${currentLevel.difficultyText}`;
+                if (isLowLevel) {
+                    breakdown = `+${pointsAdded.toFixed(1)} (фиксированные баллы для уровня ниже демона)`;
+                } else {
+                    if (progress <= 10) {
+                        breakdown = `+${pointsAdded.toFixed(1)} (правило ≤10%)`;
+                    } else if (progress < 25) {
+                        breakdown += " (половинные баллы за прогресс < 25%)";
+                    }
+                    if (progress > 50) {
+                        breakdown += " (+5 за прогресс > 50%)";
+                    }
+                    if (currentLevel.long && progress > 50) {
+                        breakdown += " (+5 за длинный уровень)";
+                    }
+                }
+            } else if (pointsAdded === 0) {
+                if (isLowLevel && progress < 25) {
+                    breakdown = "+0 (прогресс ниже 25% на уровне ниже изи демона)";
+                } else {
+                    breakdown = "+0 за пропуск";
+                }
             }
+
+            // Добавляем примечание для особого N/A уровня (Silent penis)
+            if (isSpecialNA) {
+                breakdown += " [Особый случай: уровень без звёзд, приравнен к хард демону]";
+            }
+
+            staminaBreakdownElement.innerHTML = breakdown;
         }
 
         // ---------- ОБРАБОТЧИК КНОПКИ "ДАЛЬШЕ" ----------
@@ -1250,7 +1374,6 @@
                     return;
                 }
 
-                // 100% – сразу финиш
                 if (achieved === 100) {
                     const points = calculateStaminaPoints(currentLevel, currentRequirement, achieved);
                     staminaPoints += points;
@@ -1260,34 +1383,26 @@
                     return;
                 }
 
-                // 99% -> переводим в финальный тест (100%) и выбираем НОВЫЙ уровень
                 if (achieved === 99) {
                     const points = calculateStaminaPoints(currentLevel, currentRequirement, achieved);
                     staminaPoints += points;
                     updateStaminaDisplay(points, achieved);
                     addToHistory(currentLevel, currentRequirement);
                     
-                    // Увеличиваем прогресс до 100%
                     currentRequirement = 100;
                     levelsPassed++;
                     
-                    // Обновляем статистику и интерфейс
                     levelsPassedElement.textContent = levelsPassed;
                     currentProgressElement.textContent = `${currentRequirement}%`;
                     requiredPercentageElement.textContent = `${currentRequirement}%`;
                     
-                    // Выбираем НОВЫЙ уровень для финального теста
                     selectRandomLevel();
-                    
-                    // Добавляем класс final-test
                     levelInfoElement.classList.add('final-test');
                     
-                    // Меняем кнопку на "Завершить"
                     nextButton.innerHTML = '<i class="fas fa-flag-checkered"></i> Завершить';
                     nextButton.classList.remove('next-button');
                     nextButton.classList.add('finish-button');
                     
-                    // Обработчик завершения
                     nextButton.onclick = function() {
                         const pointsFin = calculateStaminaPoints(currentLevel, currentRequirement);
                         staminaPoints += pointsFin;
@@ -1300,7 +1415,6 @@
                     return;
                 }
 
-                // Обычный случай (не 99, не 100)
                 const points = calculateStaminaPoints(currentLevel, currentRequirement, achieved);
                 staminaPoints += points;
                 updateStaminaDisplay(points, achieved);
@@ -1309,7 +1423,6 @@
                 achievedPercentageInput.value = "";
 
             } else {
-                // Режим БЕЗ флюков
                 const points = calculateStaminaPoints(currentLevel, currentRequirement);
                 staminaPoints += points;
                 updateStaminaDisplay(points, currentRequirement);
@@ -1317,19 +1430,14 @@
                 currentRequirement++;
             }
 
-            // Увеличиваем счётчик пройденных уровней
             levelsPassed++;
 
-            // Проверка на достижение 100% (без флюков или после обычного увеличения)
             if (currentRequirement === 100) {
-                // Обновляем статистику
                 levelsPassedElement.textContent = levelsPassed;
                 currentProgressElement.textContent = `${currentRequirement}%`;
                 requiredPercentageElement.textContent = `${currentRequirement}%`;
                 
-                // Выбираем НОВЫЙ уровень для финального теста
                 selectRandomLevel();
-                
                 levelInfoElement.classList.add('final-test');
                 
                 nextButton.innerHTML = '<i class="fas fa-flag-checkered"></i> Завершить';
@@ -1346,13 +1454,11 @@
                 return;
             }
 
-            // Если вдруг стало больше 100% (защита) — завершаем
             if (currentRequirement > 100) {
                 finishGame(false);
                 return;
             }
 
-            // Обновляем статистику и выбираем следующий уровень (если не финальный тест)
             levelsPassedElement.textContent = levelsPassed;
             currentProgressElement.textContent = `${currentRequirement}%`;
             if (currentRequirement < 100) {
@@ -1360,18 +1466,16 @@
             }
         }
 
-        // ---------- КНОПКА "ПРОПУСК" (обновлённая с учётом negativeSkip) ----------
+        // ---------- КНОПКА "ПРОПУСК" ----------
         skipButton.addEventListener('click', function() {
             if (!gameActive || !currentLevel) return;
 
-            // Рассчитываем штраф, если включён негативный пропуск
             let penalty = 0;
             if (negativeSkip) {
                 penalty = calculateStaminaPoints(currentLevel, currentRequirement);
-                penalty = Math.round(penalty * 10) / 10; // округление до десятых
+                penalty = Math.round(penalty * 10) / 10;
             }
 
-            // Если негативный режим включён, запрашиваем подтверждение
             if (negativeSkip) {
                 const message = `Пропуск уровня снимет ${penalty.toFixed(1)} баллов стойкости. Продолжить?`;
                 if (!confirm(message)) return;
@@ -1382,12 +1486,10 @@
                 staminaBreakdownElement.innerHTML = "+0 за пропуск";
             }
 
-            // Увеличиваем требование, добавляем в историю, увеличиваем счётчик уровней
             currentRequirement++;
             addToHistory(currentLevel, currentRequirement - 1, true);
             levelsPassed++;
 
-            // Проверка на достижение 100%
             if (currentRequirement === 100) {
                 levelsPassedElement.textContent = levelsPassed;
                 currentProgressElement.textContent = `${currentRequirement}%`;
@@ -1476,6 +1578,8 @@
                     case 'hard': difficultyClass = 'hard-demon'; break;
                     case 'insane': difficultyClass = 'insane-demon'; break;
                     case 'extreme': difficultyClass = 'extreme-demon'; break;
+                    case 'insane_non': difficultyClass = 'insane-non-demon'; break;
+                    case 'na': difficultyClass = 'na-difficulty'; break;
                 }
                 const histItem = document.createElement('div');
                 histItem.className = 'final-history-item';
@@ -1500,6 +1604,8 @@
                     case 'hard': difficultyClass = 'hard-demon'; break;
                     case 'insane': difficultyClass = 'insane-demon'; break;
                     case 'extreme': difficultyClass = 'extreme-demon'; break;
+                    case 'insane_non': difficultyClass = 'insane-non-demon'; break;
+                    case 'na': difficultyClass = 'na-difficulty'; break;
                 }
                 let status = "", statusColor = "#aaa";
                 if (item.completed) { status = ""; statusColor = "#32CD32"; }
@@ -1522,10 +1628,18 @@
         startButton.addEventListener('click', function() {
             includeOfficial = document.getElementById('mixed').checked;
             fluctMode = document.getElementById('fluct').checked;
-            negativeSkip = document.getElementById('negative-on').checked; // считываем новую опцию
+            negativeSkip = document.getElementById('negative-on').checked;
 
             allLevels = [...customLevels];
-            if (includeOfficial) allLevels = [...allLevels, ...officialLevels];
+            if (includeOfficial) {
+                allLevels = [...allLevels, ...officialLevels];
+            }
+            if (belowEasyCheckbox.checked) {
+                allLevels = [...allLevels, ...belowEasyLevels];
+            }
+            if (noStarsCheckbox.checked) {
+                allLevels = [...allLevels, ...noStarsLevels];
+            }
 
             gameActive = true;
             currentRequirement = 1;
@@ -1581,7 +1695,7 @@
         window.addEventListener('load', function() {
             optionCustom.classList.add('selected');
             optionNoFluct.classList.add('selected');
-            optionNegativeOff.classList.add('selected'); // по умолчанию негативный пропуск выключен
+            optionNegativeOff.classList.add('selected');
             nextButton.onclick = nextButtonClickHandler;
         });
     </script>
