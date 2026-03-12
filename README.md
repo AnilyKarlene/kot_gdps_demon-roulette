@@ -56,7 +56,7 @@
 
 1. Клонируйте репозиторий:
    ```bash
-   git clone https://github.com/ваш-username/roulette-kotgdps.git
+   git clone https://github.com/Anily-Karlene/roulette-kotgdps.git
 2. Откройте файл index.html в любом современном браузере.
 
 Ну или просто откройте репозиторий на GitHub Pages по этой ссылке: https://anilykarlene.github.io/kot_gdps_demon-roulette/
